@@ -6,10 +6,14 @@ import {
   GetProductById,
   UpdateProductByProducId,
 } from "../Controllers/Product.Controller";
+import { protect } from "../middleware/auth"; // ✅ import middleware
 
 const router = Router();
 
-router.post("/create", CreateProduct);
+// ✅ Protect all routes
+// router.use(protect);
+
+router.post("/create", protect, CreateProduct);
 router.patch("/update/:productId", UpdateProductByProducId);
 router.delete("/deleteProduct/:productId", DeleteProduct);
 router.get("/:productId", GetProductById);
