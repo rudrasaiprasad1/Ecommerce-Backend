@@ -4,6 +4,7 @@ import jwt, { Secret, SignOptions } from "jsonwebtoken";
 import dotenv from "dotenv";
 import { protect, AuthRequest } from "../middleware/auth";
 import User from "../Models/User";
+import rateLimit from "express-rate-limit";
 
 dotenv.config();
 const router = express.Router();
@@ -16,7 +17,7 @@ if (!JWT_SECRET) throw new Error("Missing JWT_SECRET");
 // helper to sign & send cookie
 function signSendToken(res: Response, userId: string) {
   const options: SignOptions = {
-    expiresIn: parseInt(JWT_EXPIRES_IN),
+    expiresIn: parseExpireToMs(JWT_EXPIRES_IN),
   };
   const token = jwt.sign({ id: userId }, JWT_SECRET, options);
   const isProd = process.env.NODE_ENV === "production";
@@ -41,6 +42,16 @@ function parseExpireToMs(exp: string) {
   if (exp.includes("m")) return num * 60 * 1000;
   return num * 1000;
 }
+
+// ✅ 1. Add rate limiter here
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 10, // 10 attempts per IP
+  message: "Too many login/register attempts, please try again later.",
+});
+
+// ✅ 2. Apply it only to /login and /register routes
+router.use(["/login", "/register"], authLimiter);
 
 /**
  * POST /api/auth/register
@@ -107,7 +118,9 @@ router.post("/logout", async (_req: Request, res: Response) => {
   // clear cookie by setting a short expiration
   res.clearCookie(COOKIE_NAME, {
     httpOnly: true,
+    expires: new Date(0),
     secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
   });
   res.json({ message: "Logged out" });
 });
