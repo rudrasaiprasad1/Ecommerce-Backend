@@ -100,10 +100,11 @@ router.post("/login", async (req: Request, res: Response) => {
     if (!isMatch)
       return res.status(401).json({ message: "Invalid credentials" });
 
-    signSendToken(res, user.id);
+    const token = signSendToken(res, user.id);
     res.json({
       message: "Logged in",
       user: { id: user.id, name: user.name, email: user.email },
+      token: token,
     });
   } catch (err) {
     console.error(err);

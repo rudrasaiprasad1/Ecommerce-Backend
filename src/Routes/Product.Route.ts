@@ -11,7 +11,7 @@ import { protect } from "../middleware/auth"; // ✅ import middleware
 const router = Router();
 
 // ✅ Protect all routes
-// router.use(protect);
+router.use(protect);
 
 router.post("/create", protect, CreateProduct);
 router.patch("/update/:productId", UpdateProductByProducId);
