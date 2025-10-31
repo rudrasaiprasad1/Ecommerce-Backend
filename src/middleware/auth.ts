@@ -1,3 +1,4 @@
+// src/middleware/auth.ts
 import { Request, Response, NextFunction } from "express";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import dotenv from "dotenv";
@@ -51,26 +52,3 @@ export const protect = async (
     res.status(401).json({ message: "Invalid or expired token" });
   }
 };
-
-// // src/middleware/auth.ts
-
-// export const protect = (
-//   req: AuthRequest,
-//   res: Response,
-//   next: NextFunction
-// ) => {
-//   try {
-//     const token = req.cookies?.[COOKIE_NAME];
-//     if (!token) return res.status(401).json({ message: "Not authenticated" });
-
-//     const decoded = jwt.verify(token, JWT_SECRET) as {
-//       id: string;
-//       iat: number;
-//       exp: number;
-//     };
-//     req.user = { id: decoded.id };
-//     next();
-//   } catch (err) {
-//     return res.status(401).json({ message: "Invalid/expired token" });
-//   }
-// };
