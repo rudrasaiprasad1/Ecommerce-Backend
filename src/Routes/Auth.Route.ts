@@ -17,7 +17,7 @@ if (!JWT_SECRET) throw new Error("Missing JWT_SECRET");
 // helper to sign & send cookie
 function signSendToken(res: Response, userId: string) {
   const options: SignOptions = {
-    expiresIn: parseExpireToMs(JWT_EXPIRES_IN),
+    expiresIn: parseExpireToSeconds(JWT_EXPIRES_IN),
   };
   const token = jwt.sign({ id: userId }, JWT_SECRET, options);
   const isProd = process.env.NODE_ENV === "production";
@@ -27,7 +27,7 @@ function signSendToken(res: Response, userId: string) {
     httpOnly: true,
     secure: isProd, // only send over https in prod
     sameSite: isProd ? ("strict" as const) : ("lax" as const),
-    maxAge: parseExpireToMs(JWT_EXPIRES_IN),
+    maxAge: parseExpireToSeconds(JWT_EXPIRES_IN),
   };
 
   res.cookie(COOKIE_NAME, token, cookieOptions);
@@ -35,11 +35,11 @@ function signSendToken(res: Response, userId: string) {
 }
 
 // convert simple "7d" "1h" to ms for cookie maxAge
-function parseExpireToMs(exp: string) {
+function parseExpireToSeconds(exp: string) {
   const num = parseInt(exp.replace(/\D/g, "")) || 7;
-  if (exp.includes("d")) return num * 24 * 60 * 60 * 1000;
-  if (exp.includes("h")) return num * 60 * 60 * 1000;
-  if (exp.includes("m")) return num * 60 * 1000;
+  if (exp.includes("d")) return num * 24 * 60 * 60;
+  if (exp.includes("h")) return num * 60 * 60;
+  if (exp.includes("m")) return num * 60;
   return num * 1000;
 }
 

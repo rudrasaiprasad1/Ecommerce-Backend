@@ -2,6 +2,7 @@
 import { Request, Response, NextFunction } from "express";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import dotenv from "dotenv";
+import { error } from "console";
 dotenv.config();
 
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -49,6 +50,9 @@ export const protect = async (
     next();
   } catch (err) {
     console.error("Auth error:", err);
-    res.status(401).json({ message: "Invalid or expired token" });
+    if (error instanceof Error) {
+      const { message, name } = error;
+      res.status(401).json({ name: name, message: message });
+    }
   }
 };
